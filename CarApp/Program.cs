@@ -1,4 +1,7 @@
+using CarApp;
 using CarApp.Data;
+using CarApp.Services;
+using CarApp.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,7 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(option => {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultSQLConnection"));
 });
-builder.Services.AddControllers();
+builder.Services.AddScoped<ICarService, CarService>();
+builder.Services.AddAutoMapper(typeof(MappingConfig));
+builder.Services.AddControllers()
+    .AddNewtonsoftJson()
+    .AddXmlDataContractSerializerFormatters();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
