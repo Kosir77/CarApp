@@ -1,11 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace CarApp.Models.Dto
+﻿namespace CarApp.Models.Dto
 {
-    public class CarCreateDTO
+    public class CarDetailsDTO
     {
+        public int Id { get; set; }
         public string Name { get; set; }
-        public string BrandName { get; set; }
+        public int BrandId { get; set; }
         public int Year { get; set; }
         public int Mileage { get; set; }
         public int EnginePower { get; set; }

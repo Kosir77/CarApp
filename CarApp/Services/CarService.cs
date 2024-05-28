@@ -1,6 +1,8 @@
 ﻿using CarApp.Data;
 using CarApp.Models;
+using CarApp.Models.Dto;
 using CarApp.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarApp.Services
 {
@@ -13,12 +15,14 @@ namespace CarApp.Services
             _db = db;
         }
 
-        public async Task<Car> UpdateCar(Car car)
+        public async Task<List<Car>> GetCarsByBrandAsync(int brandId)
         {
-            car.UpdatedAt = DateTime.Now;
-            _db.Cars.Update(car);
-            await _db.SaveChangesAsync();
-            return car;
+            return await _db.Cars.Where(c => c.BrandId == brandId).ToListAsync();
         }
+
+        //public async Task<Car> CreateCarAsync(CarDTO carDTO)
+        //{
+        //    var brand = await
+        //}
     }
 }

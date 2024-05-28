@@ -1,21 +1,24 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarApp.Models
 {
     public class Car
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid Id { get; set; }
-        [Required]
-        public string Registration { get; set; }
-        [Required]
+        public int Id { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
-        [Required]
-        public decimal Price { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+        public int BrandId { get; set; }
+        public CarBrand Brand { get; set; }
+
+        public int Year { get; set; }
+        public int Mileage { get; set; }
+        public int EnginePower { get; set; }
+        public CarTransmission Transmission { get; set; }
+        public int NumberOfOwners { get; set; }
+        public FuelType FuelType { get; set; }
+        public double Price { get; set; }
+        public string Image { get; set; }
     }
 }

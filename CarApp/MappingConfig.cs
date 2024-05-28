@@ -10,6 +10,8 @@ namespace CarApp
         {
             CreateMap<Car, CarDTO>().ReverseMap();
             CreateMap<Car, CarCreateDTO>().ReverseMap();
+            CreateMap<CarBrand, CarBrandDTO>().ReverseMap();
+            CreateMap<CarBrand, CarBrandCreateDTO>().ReverseMap();
         }
     }
 }
