@@ -62,6 +62,7 @@ namespace CarApp.Controllers
                     return BadRequest(createDTO);
                 }
                 var model = _mapper.Map<CarBrand>(createDTO);
+                model.BrandName = model.BrandName.ToUpper();
                 await _carBrandService.CreateAsync(model);
                 _response.Result = _mapper.Map<CarBrandDTO>(model);
                 _response.IsSuccess = true;
@@ -83,7 +84,7 @@ namespace CarApp.Controllers
         {
             try
             {
-                if (id == null)
+                if (id == 0)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
@@ -114,7 +115,7 @@ namespace CarApp.Controllers
         {
             try
             {
-                if (id == null)
+                if (id == 0)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);

@@ -20,9 +20,5 @@ namespace CarApp.Services
             return await _db.Cars.Where(c => c.BrandId == brandId).ToListAsync();
         }
 
-        //public async Task<Car> CreateCarAsync(CarDTO carDTO)
-        //{
-        //    var brand = await
-        //}
     }
 }

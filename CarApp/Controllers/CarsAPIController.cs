@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json;
 using AutoMapper;
 using CarApp.Models;
 using CarApp.Models.Dto;
@@ -27,20 +28,36 @@ namespace CarApp.Controllers
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<APIResponse>> GetCars() 
+        public async Task<ActionResult<APIResponse>> GetCars([FromQuery(Name = "Year")]int? year, [FromQuery] string? search, int pageSize = 0, int pageNumber = 1) 
         {
             try
             {
-                IEnumerable<Car> carList = await _carService.GetAllAsync();
+                IEnumerable<Car> carList;
+                if (year > 0)
+                {
+                    carList = await _carService.GetAllAsync(u => u.Year == year, pageSize: pageSize, pageNumber: pageNumber);
+                } else
+                {
+                    carList = await _carService.GetAllAsync(pageSize: pageSize, pageNumber: pageNumber);
+                }
+                if (!string.IsNullOrEmpty(search))
+                {
+                    carList = carList.Where(u => u.Name.ToLower().Contains(search));
+                }
+                Pagination pagination = new() { PageNumber = pageNumber, PageSize = pageSize };
+                Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pagination));
                 _response.Result = _mapper.Map<List<CarDTO>>(carList);
                 _response.IsSuccess = true;
                 _response.StatusCode = HttpStatusCode.OK;
                 return Ok(_response);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
+
                 _response.IsSuccess = false;
                 _response.ErrorMessages = new List<string> { ex.ToString() };
             }
+            
             return _response;
         }
 
@@ -51,12 +68,7 @@ namespace CarApp.Controllers
         public async Task<ActionResult<APIResponse>> CreateCar([FromBody] CarCreateDTO createDTO)
         {
             try
-            {
-                //if (await _carService.GetAsync(u => u.Id == createDTO.Id) != null)
-                //{
-                //    ModelState.AddModelError("CustomError", "Car Already Exists!");
-                //    return BadRequest(ModelState);
-                //}
+            { 
                 if (createDTO == null)
                 {
                     return BadRequest(createDTO);
@@ -64,7 +76,7 @@ namespace CarApp.Controllers
                 var brand = await _carBrandService.GetAsync(u => u.BrandName == createDTO.BrandName);
                 if (brand == null)
                 {
-                    var brandModel = new CarBrand { BrandName = createDTO.BrandName };
+                    var brandModel = new CarBrand { BrandName = createDTO.BrandName.ToUpper() };
                     await _carBrandService.CreateAsync(brandModel);
                     brand = brandModel;
                 }
@@ -91,7 +103,7 @@ namespace CarApp.Controllers
         {
             try
             {
-                if (id == null)
+                if (id == 0)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
@@ -122,7 +134,7 @@ namespace CarApp.Controllers
         {
             try
             {
-                if (id == null)
+                if (id == 0)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
@@ -153,17 +165,12 @@ namespace CarApp.Controllers
         {
             try
             {
-                if (brandId == null)
+                if (brandId == 0)
                 {
                     _response.StatusCode = HttpStatusCode.BadRequest;
                     return BadRequest(_response);
                 }
                 
-                //if (car == null)
-                //{
-                //    _response.StatusCode = HttpStatusCode.NotFound;
-                //    return NotFound(_response);
-                //}
                 IEnumerable<Car> carList = await _carService.GetCarsByBrandAsync(brandId);
                 _response.Result = _mapper.Map<List<CarDTO>>(carList);
                 _response.IsSuccess = true;

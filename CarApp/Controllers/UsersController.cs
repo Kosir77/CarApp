@@ -1,6 +1,8 @@
 ﻿using System.Net;
+using AutoMapper;
 using CarApp.Models;
 using CarApp.Models.Dto;
+using CarApp.Services;
 using CarApp.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +14,12 @@ namespace CarApp.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
         protected APIResponse _response;
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
             _response = new();
         }
 
@@ -40,7 +44,7 @@ namespace CarApp.Controllers
         public async Task<IActionResult> Register([FromBody] RegistrationRequestDTO model)
         {
             bool ifUserNameUnique = _userService.IsUniqueUser(model.UserName);
-            if (!ifUserNameUnique)
+            if (ifUserNameUnique == false)
             {
                 _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.IsSuccess = false;
@@ -60,5 +64,25 @@ namespace CarApp.Controllers
             _response.IsSuccess = true;
             return Ok(_response);
         }
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<APIResponse>> GetUsers()
+        {
+            try
+            {
+                IEnumerable<User> userList = await _userService.GetAllAsync();
+                _response.Result = _mapper.Map<List<UserDTO>>(userList);
+                _response.IsSuccess = true;
+                _response.StatusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorMessages = new List<string> { ex.ToString() };
+            }
+            return _response;
+        }
+        
     }
 }

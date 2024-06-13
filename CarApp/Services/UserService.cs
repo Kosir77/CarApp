@@ -8,29 +8,33 @@ using CarApp.Models;
 using CarApp.Models.Dto;
 using CarApp.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CarApp.Services
 {
-    public class UserService : IUserService
+    public class UserService : BaseService<User>,IUserService
     {
         private readonly ApplicationDbContext _db;
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly RoleManager<IdentityRole> _roleManager;
         private string secretKey;
+        
 
-        public UserService(ApplicationDbContext db, IConfiguration configuration, UserManager<User> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager)
+        public UserService(ApplicationDbContext db, IConfiguration configuration, UserManager<User> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager) : base(db)
         {
             _db = db;
             _userManager = userManager;
             _mapper = mapper;
             _roleManager = roleManager;
-            secretKey = configuration.GetValue<string>("ApiSetings:Secret");
+            secretKey = configuration.GetValue<string>("ApiSettings:Secret");
         }
+
+       
         public bool IsUniqueUser(string username)
         {
-            var user = _db.Users.FirstOrDefault(x => x.Name == username);
+            var user = _db.Users.FirstOrDefault(x => x.UserName == username);
             if (user == null)
             {
                 return true;
@@ -55,7 +59,7 @@ namespace CarApp.Services
                 };
             }
 
-            //if user was found generate JWT Token
+            
             var roles = await _userManager.GetRolesAsync(user);
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(secretKey);
@@ -96,15 +100,18 @@ namespace CarApp.Services
                 var result = await _userManager.CreateAsync(user, registrationRequestDTO.Password);
                 if (result.Succeeded)
                 {
-                    if (!_roleManager.RoleExistsAsync(registrationRequestDTO.Role).GetAwaiter().GetResult())
+                    if (!_roleManager.RoleExistsAsync("admin").GetAwaiter().GetResult())
                     {
-                        await _roleManager.CreateAsync(new IdentityRole(registrationRequestDTO.Role));
+                        await _roleManager.CreateAsync(new IdentityRole("admin"));
+                        await _roleManager.CreateAsync(new IdentityRole("user"));
                     }
-                    await _userManager.AddToRoleAsync(user, registrationRequestDTO.Role);
-                    var userToReturn = _db.Users.FirstOrDefault(u => u.UserName == registrationRequestDTO.UserName);
+                    await _userManager.AddToRoleAsync(user, "admin");
+                    var userToReturn = _db.Users
+                        .FirstOrDefault(u => u.UserName == registrationRequestDTO.UserName);
                     return _mapper.Map<UserDTO>(userToReturn);
+
                 }
-               
+
             }
             catch(Exception ex)
             {
