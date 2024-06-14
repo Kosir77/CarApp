@@ -1,9 +1,11 @@
-﻿using System.Net;
+﻿using System.Data;
+using System.Net;
 using System.Text.Json;
 using AutoMapper;
 using CarApp.Models;
 using CarApp.Models.Dto;
 using CarApp.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -95,6 +97,7 @@ namespace CarApp.Controllers
             return _response;
         }
 
+        [Authorize(Roles = "admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
