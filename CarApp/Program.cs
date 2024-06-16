@@ -21,6 +21,7 @@ builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<Appl
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<ICarBrandService, CarBrandService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 var key = builder.Configuration.GetValue<string>("ApiSettings:Secret");
